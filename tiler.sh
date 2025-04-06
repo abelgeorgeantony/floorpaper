@@ -8,7 +8,7 @@ fi
 
 # Tiler for GNOME(Wayland)
 
-TilesFolder=/home/abelgeorgeantony/workspace/side/floorpaper/TilesArchive
+TilesFolder=/home/abelgeorgeantony/workspace/side/floorpaper/TilesArchive/repo1
 SetWallpaper="gsettings set org.gnome.desktop.background picture-uri-dark file://$TilesFolder/wallpaper.png"
 SaveCurrentWallpaper() {
   if [ ! -f $TilesFolder/backup.wallpaper.png ]; then
