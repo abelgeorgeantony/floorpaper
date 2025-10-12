@@ -6,8 +6,15 @@ then
         exit
 fi
 
-# Tiler for GNOME(Wayland)
+# Dependency check
+for cmd in fzf chafa composite; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo -e "Error: $cmd is not installed.\nPlease make sure the required dependencies: fzf, chafa, and composite(imagemagick) are installed." >&2
+    exit 1
+  fi
+done
 
+# Tiler for GNOME(Wayland)
 TilesFolder=/home/abelgeorgeantony/workspace/side/floorpaper/TilesArchive/repo1
 SetWallpaper="gsettings set org.gnome.desktop.background picture-uri-dark file://$TilesFolder/wallpaper.png"
 SaveCurrentWallpaper() {
@@ -30,7 +37,7 @@ trap SetOriginalWallpaper EXIT
 while true
 do
   clear
-  SelectedTile=$(fzf --preview="$TilePreview && $DesktopPreview")
+  SelectedTile=$(find "$TilesFolder" -type f | fzf --preview="$TilePreview && $DesktopPreview")
   chafa $SelectedTile
   echo -e "You selected this tile.\nConfirm to apply(y/n):"
   read tileconfirmation
