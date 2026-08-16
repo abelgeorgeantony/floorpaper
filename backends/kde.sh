@@ -2,41 +2,41 @@
 #
 # backends/kde.sh - KDE Plasma backend for floorpaper.
 #
-# This standalone script implements the five subcommands required by
-# floorpaper.sh's backend protocol.
-#
 set -euo pipefail
 
 cmd_is_supported() {
-  # Exit 0 if running KDE Plasma and the native wallpaper tool is available
   [[ "${XDG_CURRENT_DESKTOP:-}" == *KDE* ]] && command -v plasma-apply-wallpaperimage &>/dev/null
 }
 
 cmd_get_resolution() {
-  # Try xrandr first (works on X11 and XWayland)
-  if command -v xrandr &>/dev/null && [ -n "${DISPLAY:-}" ]; then
+  # Attempt native KDE Wayland resolution detection safely
+  if command -v kscreen-doctor &>/dev/null; then
     local res
-    res="$(xrandr --current 2>/dev/null | awk '/\*/ {print $1; exit}')"
+    res="$(kscreen-doctor -o 2>/dev/null | grep -oE 'geometry: [0-9,-]+ [0-9x]+' | head -n 1 | awk '{print $3}' || true)"
     if [ -n "$res" ]; then
       echo "$res"
       return 0
     fi
   fi
   
-  # Fall back to a common default if xrandr fails; users can override with --size
-  echo "Warning: could not detect display resolution, defaulting to 1920x1080." >&2
+  # Fallback to xrandr
+  if command -v xrandr &>/dev/null && [ -n "${DISPLAY:-}" ]; then
+    local res
+    res="$(xrandr --current 2>/dev/null | awk '/\*/ {print $1; exit}' || true)"
+    if [ -n "$res" ]; then
+      echo "$res"
+      return 0
+    fi
+  fi
+  
   echo "1920x1080"
 }
 
 cmd_get_current() {
   local config_file="$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc"
   if [ -f "$config_file" ]; then
-    # KDE stores wallpaper paths mapped per screen. We grep the last known 'Image=' string.
     local current_img
-    current_img="$(grep '^Image=' "$config_file" 2>/dev/null | tail -n 1 | sed -e 's/^Image=//' -e 's/^file:\/\///')"
-    
-    # floorpaper expects two lines (light mode and dark mode)
-    # KDE does not separate these strictly, so we output the same path twice.
+    current_img="$(grep '^Image=' "$config_file" 2>/dev/null | tail -n 1 | sed -e 's/^Image=//' -e 's/^file:\/\///' || true)"
     echo "$current_img"
     echo "$current_img"
   else
@@ -47,18 +47,31 @@ cmd_get_current() {
 
 cmd_set_wallpaper() {
   local path="$1"
-  plasma-apply-wallpaperimage "$path" >/dev/null 2>&1 || true
+  if [ ! -f "$path" ]; then
+    return 1
+  fi
+  
+  local dir filename cache_buster unique_path
+  dir="$(dirname "$path")"
+  filename="$(basename "$path")"
+  
+  cache_buster="${filename%.*}_kde_$(date +%s%N).${filename##*.}"
+  unique_path="$dir/$cache_buster"
+  
+  if cp -f "$path" "$unique_path" 2>/dev/null; then
+    plasma-apply-wallpaperimage "$unique_path" >/dev/null 2>&1 || true
+    # Clean up old previews safely
+    find "$dir" -maxdepth 1 -type f -name "${filename%.*}_kde_*.*" ! -name "$cache_buster" -delete 2>/dev/null || true
+  fi
 }
 
 cmd_restore() {
   local uri="$1"
-  # KDE does not require uri_dark, so we just restore using the first argument
   if [ -n "$uri" ]; then
-    cmd_set_wallpaper "$uri"
+    plasma-apply-wallpaperimage "$uri" >/dev/null 2>&1 || true
   fi
 }
 
-# Entrypoint routing based on floorpaper.sh contract
 case "${1:-}" in
   is-supported)   cmd_is_supported ;;
   get-resolution) cmd_get_resolution ;;
