@@ -1,0 +1,18 @@
+[submodule "tiles/tile-anon/tiles"]
+	path = tiles/tile-anon/tiles
+	url = https://github.com/tile-anon/tiles.git
+[submodule "tiles/wallace-aph/tiles-and-such"]
+	path = tiles/wallace-aph/tiles-and-such
+	url = https://github.com/wallace-aph/tiles-and-such.git
+[submodule "tiles/rann01/IRIX-tiles"]
+	path = tiles/rann01/IRIX-tiles
+	url = https://github.com/rann01/IRIX-tiles.git
+[submodule "tiles/rasatpc/Tiled-wallpapers"]
+	path = tiles/rasatpc/Tiled-wallpapers
+	url = https://github.com/rasatpc/Tiled-wallpapers.git
+[submodule "tiles/jessefalzone/windows-wallpaper-tiles"]
+	path = tiles/jessefalzone/windows-wallpaper-tiles
+	url = https://github.com/jessefalzone/windows-wallpaper-tiles.git
+[submodule "tiles/stephenmkbrady/seamless_tileable_wallpapers"]
+	path = tiles/stephenmkbrady/seamless_tileable_wallpapers
+	url = https://github.com/stephenmkbrady/seamless_tileable_wallpapers.git
