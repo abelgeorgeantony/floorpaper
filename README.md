@@ -3,36 +3,17 @@
 A tiled alternative to wallpaper. Pick a small tile image, floorpaper repeats
 it across your screen and sets it as your desktop background.
 
-## Architecture
+## Supported DEs
 
-The project is split into two scripts with a clean separation of concerns:
-
-- **`tiler.sh`** - a standalone image-generation tool. Given one tile image,
-  it produces a larger image made of that tile repeated across a canvas.
-  It has no idea what a desktop environment is, and can be used on its own.
-- **`floorpaper.sh`** - the interactive picker. It knows where your tile
-  sources live, scans them for images, drives an `fzf` + `chafa` TUI with a
-  live preview, and calls `tiler.sh` to generate each candidate. Setting the
-  actual desktop wallpaper is delegated to a **backend** script.
-- **`backends/*.sh`** - one script per desktop environment. Currently only
-  GNOME is implemented (`backends/gnome.sh`), but the interface is small and
-  generic on purpose, see [Adding a new backend](#adding-a-new-backend).
-
-```
-floorpaper.sh  --scans-->  tiles/ (git submodules, images only)
-      |
-      |--calls-->  tiler.sh   (generates the tiled image)
-      |
-      |--calls-->  backends/<de>.sh  (applies it, gets/restores current wallpaper)
-```
+[GNOME](backends/gnome.sh)
+[KDE](backends/kde.sh)
 
 ## Dependencies
 
 - `fzf` - interactive tile selection
 - `chafa` - terminal image preview
 - `imagemagick` (`convert`, `composite`, `identify`) - tile generation
-- A supported desktop backend's own tools - for GNOME, `gsettings`
-  (usually already present)
+- A supported desktop backend's own tools - for GNOME, `gsettings` (usually already present)
 
 On Debian/Ubuntu:
 
