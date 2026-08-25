@@ -57,13 +57,14 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+## Disabled to reduce tiler.sh not check at every iteration. tiler.sh is an internal tool of floorpaper.sh so check disabling is ok.
 # ---- Dependency check ----
-for cmd in convert composite identify; do
-  if ! command -v "$cmd" &>/dev/null; then
-    echo "Error: $cmd is not installed. Please install imagemagick." >&2
-    exit 1
-  fi
-done
+#for cmd in convert composite identify; do
+#  if ! command -v "$cmd" &>/dev/null; then
+#    echo "Error: $cmd is not installed. Please install imagemagick." >&2
+#    exit 1
+#  fi
+#done
 
 # ---- Validation ----
 is_dims() { [[ "$1" =~ ^[0-9]+x[0-9]+$ ]]; }
@@ -137,14 +138,11 @@ fi
 mkdir -p "$(dirname "$Output")"
 
 if [ -n "$TileW" ]; then
-  # A specific tile size was requested (directly or derived) - resize first.
-  TmpTile="$(mktemp --suffix=.png)"
-  trap 'rm -f "$TmpTile"' EXIT
-  convert "$Input" -resize "${TileW}x${TileH}!" "$TmpTile"
-  composite -tile "$TmpTile" -size "${CanvasW}x${CanvasH}" xc:none "$Output"
+  # Single-pass in-memory resize and tile without temporary file I/O
+  convert "$Input" -resize "${TileW}x${TileH}!" -write mpr:tile +delete -size "${CanvasW}x${CanvasH}" tile:mpr:tile "$Output"
 else
-  # No sizing requested - repeat the tile at its native resolution.
-  composite -tile "$Input" -size "${CanvasW}x${CanvasH}" xc:none "$Output"
+  # Single-pass native tiling
+  convert -size "${CanvasW}x${CanvasH}" tile:"$Input" "$Output"
 fi
 
 echo "Generated: $Output (${CanvasW}x${CanvasH})"

@@ -3,17 +3,18 @@
 A tiled alternative to wallpaper. Pick a small tile image, floorpaper repeats
 it across your screen and sets it as your desktop background.
 
-## Supported DEs
+## Supported platforms
 
-[GNOME](backends/gnome.sh)
-[KDE](backends/kde.sh)
+[GNOME](backends/gnome.sh)\
+[KDE](backends/kde.sh)\
+[Android (termux)](backends/termux.sh)
 
 ## Dependencies
 
 - `fzf` - interactive tile selection
 - `chafa` - terminal image preview
 - `imagemagick` (`convert`, `composite`, `identify`) - tile generation
-- A supported desktop backend's own tools - for GNOME, `gsettings` (usually already present)
+- A supported platform's own tools - for GNOME, `gsettings` (usually already present)
 
 On Debian/Ubuntu:
 
@@ -21,12 +22,27 @@ On Debian/Ubuntu:
 sudo apt-get install fzf chafa imagemagick
 ```
 
+### Setup
+
+Clone the repo:
+
+```bash
+git clone --recurse-submodules https://github.com/abelgeorgeantony/floorpaper.git
+```
+
+Run the setup script:
+
+```bash
+cd floorpaper/
+./setup.sh
+```
+
 ## Usage
 
 Run the picker:
 
 ```bash
-./floorpaper.sh
+floorpaper
 ```
 
 This scans `tiles/` for image files, and opens an `fzf` window where moving
